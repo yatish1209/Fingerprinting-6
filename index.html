@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fingerprinting</title>
+    <link  href="styles.css"  rel="stylesheet"  >
+</head>
+<body>
+  <form action="https://sheetdb.io/api/v1/w3rcsxtqatd69" method="post" id="sheetdb-form">
+    <div class="container">
+        <h1>Collect Data</h1>
+        <p>Enter Coordinates and Tap Collect Data</p>
+        <hr>
+
+        <label for="latitude"><b>Latitude</b></label>
+        <input type="text" placeholder="Enter Latitude" name="data[latitude]" id="latitudeInput" required>
+
+        <label for="longitude"><b>Longitude</b></label>
+        <input type="text" placeholder="Enter Longitude" name="data[longitude]" id="longitudeInput" required>
+
+        <div class="clearfix">
+            <button type="button" class="cancelbtn">Cancel</button>
+            <button type="button" class="collectdatabtn" onclick="collectAndSubmitData()">Collect Data</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    function collectAndSubmitData() {
+        // Get latitude and longitude values
+        var latitude = document.getElementById('latitudeInput').value;
+        var longitude = document.getElementById('longitudeInput').value;
+
+        // Collect WLAN signal strength and Cellular signal strength (Example values)
+        var wlanSignalStrength = getWLANSignalStrength();
+        var cellularSignalStrength = getCellularSignalStrength();
+
+        // Prepare the data to be submitted
+        var formData = new FormData();
+        formData.append('data[latitude]', latitude);
+        formData.append('data[longitude]', longitude);
+        formData.append('data[wlan_strength]', wlanSignalStrength);
+        formData.append('data[cellular_strength]', cellularSignalStrength);
+
+        // Submit the form data
+        fetch('https://sheetdb.io/api/v1/w3rcsxtqatd69', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                alert('Data collected and submitted successfully!');
+            } else {
+                alert('Failed to submit data. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting data. Please try again later.');
+        });
+    }
+
+    // Function to simulate getting WLAN signal strength (Example function)
+    function getWLANSignalStrength() {
+        // Simulate getting WLAN signal strength
+        return Math.floor(Math.random() * 30)+1; // Example: Random number between 0 and 100
+    }
+
+    // Function to simulate getting Cellular signal strength (Example function)
+    function getCellularSignalStrength() {
+        // Simulate getting Cellular signal strength
+        return Math.floor(Math.random() * 30)+1; // Example: Random number between 0 and 100
+    }
+</script>
+
+    
+</body>
+</html>
