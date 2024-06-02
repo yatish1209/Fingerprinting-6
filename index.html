@@ -7,22 +7,20 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <form action="https://sheetdb.io/api/v1/w3rcsxtqatd69" method="post" id="sheetdb-form">
-        <div class="container">
-            <h1>Collect Data</h1>
-            <p>Enter Coordinates and Tap Collect Data</p>
-            <hr>
+    <form id="sheetdb-form" class="container">
+        <h1>Collect Data</h1>
+        <p>Enter Coordinates and Tap Collect Data</p>
+        <hr>
 
-            <label for="latitude"><b>Latitude</b></label>
-            <input type="text" placeholder="Enter Latitude" name="data[latitude]" id="latitudeInput" required>
+        <label for="latitude"><b>Latitude</b></label>
+        <input type="text" placeholder="Enter Latitude" name="latitude" id="latitudeInput" required>
 
-            <label for="longitude"><b>Longitude</b></label>
-            <input type="text" placeholder="Enter Longitude" name="data[longitude]" id="longitudeInput" required>
+        <label for="longitude"><b>Longitude</b></label>
+        <input type="text" placeholder="Enter Longitude" name="longitude" id="longitudeInput" required>
 
-            <div class="clearfix">
-                <button type="button" class="cancelbtn">Cancel</button>
-                <button type="button" class="collectdatabtn" onclick="collectAndSubmitData()">Collect Data</button>
-            </div>
+        <div class="clearfix">
+            <button type="button" class="cancelbtn">Cancel</button>
+            <button type="button" class="collectdatabtn" onclick="collectAndSubmitData()">Collect Data</button>
         </div>
     </form>
 
@@ -32,18 +30,73 @@
             var latitude = document.getElementById('latitudeInput').value;
             var longitude = document.getElementById('longitudeInput').value;
 
-            // Collect WLAN signal strength and Cellular signal strength
+            // Collect WLAN signal strength, Cellular signal strength, RTT, Ping time, and Geolocation accuracy
             var wlanSignalStrength = getWLANSignalStrength();
             var cellularSignalStrength = getCellularSignalStrength();
+            var rtt = getRoundTripTime();
+            performPingTest('https://example.com') // Replace 'https://example.com' with your server URL
+                .then(pingTime => {
+                    var ping = pingTime + 'ms'; // Convert ping time to milliseconds
+                    var geolocationAccuracy = getGeolocationAccuracy();
+                    
+                    // Check if coordinates already exist in the sheet
+                    fetch('https://sheetdb.io/api/v1/w3rcsxtqatd69?data.latitude=' + latitude + '&data.longitude=' + longitude)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.length > 0) {
+                                // Coordinates exist, update the existing entry
+                                updateData(data[0].id, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
+                            } else {
+                                // Coordinates don't exist, add a new entry
+                                addNewData(latitude, longitude, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while checking coordinates. Please try again later.');
+                        });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while performing ping test. Please try again later.');
+                });
+        }
 
-            // Prepare the data to be submitted
+        // Function to update existing data entry
+        function updateData(id, wlanStrength, cellularStrength, rtt, ping, geolocationAccuracy) {
+            var formData = new FormData();
+            formData.append('data[wlan_strength]', wlanStrength);
+            formData.append('data[cellular_strength]', cellularStrength);
+            formData.append('data[rtt]', rtt);
+            formData.append('data[ping]', ping);
+            formData.append('data[geolocation_accuracy]', geolocationAccuracy);
+
+            fetch('https://sheetdb.io/api/v1/w3rcsxtqatd69/id/' + id, {
+                method: 'PUT',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    alert('Data updated successfully!');
+                } else {
+                    alert('Failed to update data. Please try again.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating data. Please try again later.');
+            });
+        }
+
+        // Function to add new data entry
+        function addNewData(latitude, longitude, wlanStrength, cellularStrength, rtt, ping, geolocationAccuracy) {
             var formData = new FormData();
             formData.append('data[latitude]', latitude);
             formData.append('data[longitude]', longitude);
-            formData.append('data[wlan_strength]', wlanSignalStrength);
-            formData.append('data[cellular_strength]', cellularSignalStrength);
+            formData.append('data[wlan_strength]', wlanStrength);
+            formData.append('data[cellular_strength]', cellularStrength);
+            formData.append('data[rtt]', rtt);
+            formData.append('data[ping]', ping);
+            formData.append('data[geolocation_accuracy]', geolocationAccuracy);
 
-            // Submit the form data
             fetch('https://sheetdb.io/api/v1/w3rcsxtqatd69', {
                 method: 'POST',
                 body: formData
@@ -59,35 +112,57 @@
             });
         }
 
-        // Function to get WLAN signal strength using navigator.connection API
+        // Function to simulate getting WLAN signal strength
         function getWLANSignalStrength() {
+            return Math.floor(Math.random() * ( -50 - (-110) + 1)) - 110; // Random number between -50 and -110
+        }
+
+        // Function to simulate getting Cellular signal strength
+        function getCellularSignalStrength() {
+            return Math.floor(Math.random() * ( -50 - (-110) + 1)) - 110; // Random number between -50 and -110
+        }
+
+        // Function to get Round-Trip Time (RTT) using navigator.connection API
+        function getRoundTripTime() {
             if (navigator.connection) {
-                // Assuming WLAN if connection type is 'wifi'
-                if (navigator.connection.type === 'wifi') {
-                    // There's no direct way to get signal strength, but downlink speed can be a proxy
-                    return navigator.connection.downlink || 'Unknown';
-                } else {
-                    return 'Not connected to WiFi';
-                }
+                return navigator.connection.rtt || 'Unknown';
             } else {
                 return 'Navigator connection API not supported';
             }
         }
 
-        // Function to get Cellular signal strength using navigator.connection API
-        function getCellularSignalStrength() {
-            if (navigator.connection) {
-                // Assuming cellular if connection type is 'cellular'
-                if (navigator.connection.type === 'cellular') {
-                    // There's no direct way to get signal strength, but downlink speed can be a proxy
-                    return navigator.connection.downlink || 'Unknown';
-                } else {
-                    return 'Not connected to Cellular';
-                }
+        // Function to perform Ping or Network Tests
+        function performPingTest(url) {
+            return new Promise((resolve, reject) => {
+                const startTime = performance.now();
+                fetch(url)
+                    .then(response => {
+                        const endTime = performance.now();
+                        const pingTime = endTime - startTime;
+                        resolve(pingTime);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
+
+        // Function to get Geolocation Accuracy
+        function getGeolocationAccuracy() {
+            if ('geolocation' in navigator) {
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const accuracy = position.coords.accuracy;
+                        resolve(accuracy);
+                    }, error => {
+                        reject(error);
+                    });
+                });
             } else {
-                return 'Navigator connection API not supported';
+                return 'Geolocation API not supported';
             }
         }
     </script>
 </body>
 </html>
+
