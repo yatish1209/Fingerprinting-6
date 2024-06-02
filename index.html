@@ -131,21 +131,7 @@
             }
         }
 
-        // Function to perform Ping or Network Tests
-        function performPingTest(url) {
-            return new Promise((resolve, reject) => {
-                const startTime = performance.now();
-                fetch(url)
-                    .then(response => {
-                        const endTime = performance.now();
-                        const pingTime = endTime - startTime;
-                        resolve(pingTime);
-                    })
-                    .catch(error => {
-                        reject(error);
-                    });
-            });
-        }
+
 
         // Function to get Geolocation Accuracy
         function getGeolocationAccuracy() {
