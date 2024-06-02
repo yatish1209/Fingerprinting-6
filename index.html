@@ -34,37 +34,11 @@
             var wlanSignalStrength = getWLANSignalStrength();
             var cellularSignalStrength = getCellularSignalStrength();
             var rtt = getRoundTripTime();
-            performPingTest('https://example.com') // Replace 'https://example.com' with your server URL
-                .then(pingTime => {
-                    var ping = pingTime + 'ms'; // Convert ping time to milliseconds
-                    getGeolocationAccuracy().then(geolocationAccuracy => {
-                        // Check if coordinates already exist in the sheet
-                        fetch(`https://sheetdb.io/api/v1/w3rcsxtqatd69?latitude=${latitude}&longitude=${longitude}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.length > 0) {
-                                    // Coordinates exist, update the existing entry
-                                    updateData(data[0].id, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
-                                } else {
-                                    // Coordinates don't exist, add a new entry
-                                    addNewData(latitude, longitude, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                alert('An error occurred while checking coordinates. Please try again later.');
-                            });
-                    }).catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while getting geolocation accuracy. Please try again later.');
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while performing ping test. Please try again later.');
-                });
-        }
+            var ping = performPingTest();
+            var geoaccu = getGeolocationAccuracy();
 
+        }
+            
         // Function to update existing data entry
         function updateData(id, wlanStrength, cellularStrength, rtt, ping, geolocationAccuracy) {
             var formData = new FormData();
@@ -133,12 +107,10 @@
         }
 
         // Function to simulate Ping or Network Tests
-        function performPingTest(url) {
-            return new Promise((resolve, reject) => {
-                // Generate a random number between 0.01 and 2.0
-                const simulatedPing = (Math.random() * (2.0 - 0.01) + 0.01).toFixed(2);
-                resolve(simulatedPing);
-            });
+        function performPingTest() {
+            // Generate a random number between 0.01 and 2.0
+            const pingtime = (Math.random() * (2.0 - 0.01) + 0.01).toFixed(2);
+            return pingtime;
         }
 
         // Function to simulate Geolocation Accuracy
