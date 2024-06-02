@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>fingerprinting</title>
+    <title>Fingerprinting</title>
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
@@ -37,24 +37,27 @@
             performPingTest('https://example.com') // Replace 'https://example.com' with your server URL
                 .then(pingTime => {
                     var ping = pingTime + 'ms'; // Convert ping time to milliseconds
-                    var geolocationAccuracy = getGeolocationAccuracy();
-                    
-                    // Check if coordinates already exist in the sheet
-                    fetch('https://sheetdb.io/api/v1/w3rcsxtqatd69?data.latitude=' + latitude + '&data.longitude=' + longitude)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.length > 0) {
-                                // Coordinates exist, update the existing entry
-                                updateData(data[0].id, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
-                            } else {
-                                // Coordinates don't exist, add a new entry
-                                addNewData(latitude, longitude, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('An error occurred while checking coordinates. Please try again later.');
-                        });
+                    getGeolocationAccuracy().then(geolocationAccuracy => {
+                        // Check if coordinates already exist in the sheet
+                        fetch(`https://sheetdb.io/api/v1/w3rcsxtqatd69?latitude=${latitude}&longitude=${longitude}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.length > 0) {
+                                    // Coordinates exist, update the existing entry
+                                    updateData(data[0].id, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
+                                } else {
+                                    // Coordinates don't exist, add a new entry
+                                    addNewData(latitude, longitude, wlanSignalStrength, cellularSignalStrength, rtt, ping, geolocationAccuracy);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('An error occurred while checking coordinates. Please try again later.');
+                            });
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while getting geolocation accuracy. Please try again later.');
+                    });
                 })
                 .catch(error => {
                     console.error('Error:', error);
@@ -114,41 +117,38 @@
 
         // Function to simulate getting WLAN signal strength
         function getWLANSignalStrength() {
-            return Math.floor(Math.random() * ( -50 - (-110) + 1)) - 110; // Random number between -50 and -110
+            return Math.floor(Math.random() * (-50 - (-110) + 1)) + (-110); // Random number between -50 and -110
         }
 
         // Function to simulate getting Cellular signal strength
         function getCellularSignalStrength() {
-            return Math.floor(Math.random() * ( -50 - (-110) + 1)) - 110; // Random number between -50 and -110
+            return Math.floor(Math.random() * (-50 - (-110) + 1)) + (-110); // Random number between -50 and -110
         }
 
-        // Function to get Round-Trip Time (RTT) using navigator.connection API
+        // Function to simulate Round-Trip Time (RTT)
         function getRoundTripTime() {
-            if (navigator.connection) {
-                return navigator.connection.rtt || 'Unknown';
-            } else {
-                return 'Navigator connection API not supported';
-            }
+            // Generate a random number between 0.01 and 2.0
+            const simulatedRTT = (Math.random() * (2.0 - 0.01) + 0.01).toFixed(2);
+            return simulatedRTT;
         }
 
+        // Function to simulate Ping or Network Tests
+        function performPingTest(url) {
+            return new Promise((resolve, reject) => {
+                // Generate a random number between 0.01 and 2.0
+                const simulatedPing = (Math.random() * (2.0 - 0.01) + 0.01).toFixed(2);
+                resolve(simulatedPing);
+            });
+        }
 
-
-        // Function to get Geolocation Accuracy
+        // Function to simulate Geolocation Accuracy
         function getGeolocationAccuracy() {
-            if ('geolocation' in navigator) {
-                return new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const accuracy = position.coords.accuracy;
-                        resolve(accuracy);
-                    }, error => {
-                        reject(error);
-                    });
-                });
-            } else {
-                return 'Geolocation API not supported';
-            }
+            // Generate a random number between 0.01 and 2.0
+            const simulatedAccuracy = (Math.random() * (2.0 - 0.01) + 0.01).toFixed(2);
+            return new Promise((resolve) => {
+                resolve(simulatedAccuracy);
+            });
         }
     </script>
 </body>
 </html>
-
